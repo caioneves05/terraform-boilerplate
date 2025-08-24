@@ -8,43 +8,61 @@ terraform {
 }
 
 variable "aws_profile" {
-  type    = string
-  default = null
+  type        = string
+  default     = null
   description = "AWS CLI profile to use"
 }
 
 provider "aws" {
-  region  = "us-east-2"
+  region = "us-east-2"
 }
 
 resource "aws_security_group" "security-group-boilerplate" {
-    name = "security-group-example"
-    description = "Allow http access to ec2."
+  name        = "security-group-example"
+  description = "Allow http access to ec2."
 
-    ingress {
-        from_port = 80
-        to_port = 80
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-    egress {
-        from_port = 0
-        to_port = 65535
-        protocol = "-1"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+  #enable connection with SSH port default 22
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_key_pair" "keypair" {
+  public_key = file("~/.ssh/id_ed25519.pub")
+  key_name   = "boilerplate-keypair"
 }
 
 resource "aws_instance" "server-boilerplate" {
-  ami           = "ami-0c101f26f147fa7fd"
+  ami           = "ami-0c55b159cbfafe1f0"
   instance_type = "t2.nano"
-  user_data = file("user_data.sh")
+  user_data     = file("user_data.sh")
+  key_name      = aws_key_pair.keypair.key_name
 
-    tags = {
-        Name = "boilerplate-server"
-    }
+  tags = {
+    Name = "boilerplate-server"
+  }
   vpc_security_group_ids = [aws_security_group.security-group-boilerplate.id]
 
-  depends_on = [aws_security_group.security-group-boilerplate]
+}
+
+output "instance_public_ip" {
+  value       = aws_instance.server-boilerplate.public_ip
+  description = "Public IP of the EC2 instance"
 }
