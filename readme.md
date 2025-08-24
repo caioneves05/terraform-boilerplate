@@ -83,6 +83,50 @@ This project is a boilerplate that integrates a Java (Spring Boot) application w
 
 > **Attention:** Review the Terraform files before applying them in production.
 
+## Best Practices for AWS Credentials with Terraform
+
+**Do not hardcode the `profile` parameter in the Terraform provider block.**
+
+Hardcoding the AWS profile in your Terraform configuration can reduce portability and flexibility, especially in collaborative or automated environments. Instead, prefer the following approaches:
+
+### 1. Use Environment Variables
+Set the AWS profile before running Terraform:
+```sh
+export AWS_PROFILE=your-sso-profile
+```
+This allows Terraform to use the correct credentials without changing the code.
+
+### 2. Use SSO with AWS CLI
+If you use AWS SSO, authenticate with:
+```sh
+aws sso login --profile your-sso-profile
+```
+Then, set the profile as shown above.
+
+### 3. (Optional) Use a Terraform Variable for the Profile
+For advanced use, you can define a variable in your Terraform code:
+```hcl
+variable "aws_profile" {
+  type        = string
+  default     = null
+  description = "AWS CLI profile to use."
+}
+
+provider "aws" {
+  region  = "us-east-2"
+  profile = var.aws_profile
+}
+```
+And run:
+```sh
+terraform plan -var="aws_profile=your-sso-profile"
+```
+
+**Summary:**
+- Avoid hardcoding the profile in the provider block.
+- Prefer environment variables or variables in Terraform for flexibility and security.
+- This makes your code more portable and CI/CD friendly.
+
 ## License
 
 See the [LICENSE](LICENSE) file for more details.
