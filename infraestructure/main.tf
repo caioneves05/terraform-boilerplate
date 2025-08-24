@@ -30,7 +30,7 @@ resource "aws_security_group" "security-group-boilerplate" {
 
     egress {
         from_port = 0
-        to_port = 65500
+        to_port = 65535
         protocol = "-1"
         cidr_blocks = ["0.0.0.0/0"]
     }

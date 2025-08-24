@@ -33,7 +33,7 @@ build/
 .vscode/
 
 ###terraform###
-./infraestructure/.terraform/
-./infraestructure/*.tfstate
-./infraestructure/*.tfstate.*
-./infraestructure/.terraform.lock.hcl
+infraestructure/.terraform/
+infraestructure/*.tfstate
+infraestructure/*.tfstate.*
+infraestructure/.terraform.lock.hcl
